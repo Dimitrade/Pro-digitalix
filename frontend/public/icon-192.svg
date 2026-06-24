@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" fill="none">
+  <defs>
+    <linearGradient id="pd" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#00C8FF"/>
+      <stop offset="40%"  stop-color="#1A6EFF"/>
+      <stop offset="100%" stop-color="#0A1A6E"/>
+    </linearGradient>
+  </defs>
+  <!-- Fond arrondi -->
+  <rect width="192" height="192" rx="40" fill="#0B1426"/>
+  <!-- P stem -->
+  <rect x="28" y="28" width="22" height="136" rx="8" fill="url(#pd)"/>
+  <!-- P bowl -->
+  <path d="M50 28 Q98 28 98 66 Q98 104 50 104 Z" fill="url(#pd)"/>
+  <!-- P inner -->
+  <path d="M58 46 Q82 46 82 66 Q82 86 58 86 Z" fill="#0B1426"/>
+  <!-- D stem -->
+  <rect x="112" y="28" width="22" height="136" rx="8" fill="url(#pd)"/>
+  <!-- D arc -->
+  <path d="M134 28 C162 28 172 50 172 96 C172 142 162 164 134 164 L134 146 C152 146 152 126 152 96 C152 66 152 46 134 46 Z" fill="url(#pd)"/>
+</svg>

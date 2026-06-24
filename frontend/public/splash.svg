@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" fill="none">
+  <rect width="390" height="844" fill="#0A0F1C"/>
+  <defs>
+    <radialGradient id="orb" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1A6EFF" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#0A0F1C" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="pd" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#00C8FF"/>
+      <stop offset="40%"  stop-color="#1A6EFF"/>
+      <stop offset="100%" stop-color="#0A1A6E"/>
+    </linearGradient>
+    <linearGradient id="txt" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#1A6EFF"/>
+      <stop offset="100%" stop-color="#00C8FF"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Orb glow -->
+  <ellipse cx="195" cy="400" rx="260" ry="260" fill="url(#orb)"/>
+
+  <!-- Logo PD — 130×130 centré -->
+  <g transform="translate(130, 310)">
+    <!-- P stem -->
+    <rect x="8" y="8" width="15" height="114" rx="6" fill="url(#pd)"/>
+    <!-- P bowl -->
+    <path d="M23 8 Q72 8 72 42 Q72 76 23 76 Z" fill="url(#pd)"/>
+    <!-- P inner cutout -->
+    <path d="M29 22 Q60 22 60 42 Q60 62 29 62 Z" fill="#0A0F1C"/>
+    <!-- D stem -->
+    <rect x="82" y="8" width="15" height="114" rx="6" fill="url(#pd)"/>
+    <!-- D arc -->
+    <path d="M97 8 C118 8 128 24 128 65 C128 106 118 122 97 122 L97 108 C112 108 114 92 114 65 C114 38 112 22 97 22 Z" fill="url(#pd)"/>
+  </g>
+
+  <!-- PRO -->
+  <text x="195" y="480" font-family="Inter,system-ui,sans-serif" font-weight="900"
+    font-size="32" fill="#0F172A" text-anchor="middle" letter-spacing="2">PRO</text>
+  <!-- DIGITALIX gradient via tspan trick -->
+  <text x="195" y="516" font-family="Inter,system-ui,sans-serif" font-weight="900"
+    font-size="36" fill="url(#txt)" text-anchor="middle" letter-spacing="1">DIGITALIX</text>
+  <!-- Tagline officielle -->
+  <text x="195" y="546" font-family="Inter,system-ui,sans-serif" font-weight="400"
+    font-size="12" fill="#64748B" text-anchor="middle" letter-spacing="0.5">
+    Analysez • Optimisez • Développez
+  </text>
+
+  <!-- ANABOK credit -->
+  <text x="195" y="790" font-family="Inter,system-ui,sans-serif" font-weight="500"
+    font-size="11" fill="#334155" text-anchor="middle">
+    Développé par ANABOK GROUP
+  </text>
+
+  <!-- Dots indicateur -->
+  <circle cx="187" cy="812" r="3.5" fill="#1A6EFF"/>
+  <circle cx="196" cy="812" r="3.5" fill="#1E293B"/>
+  <circle cx="205" cy="812" r="3.5" fill="#1E293B"/>
+</svg>

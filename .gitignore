@@ -1,0 +1,35 @@
+node_modules/
+.next/
+dist/
+dist-electron/
+out/
+
+# Variables d'environnement — JAMAIS commitées
+.env
+.env.local
+.env.development
+backend/.env
+frontend/.env.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Build artifacts
+electron/dist/
+android/
+ios/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Keystore Android (SÉCURITÉ)
+*.jks
+*.keystore

@@ -1,0 +1,22 @@
+{
+  "name": "pro-digitalix",
+  "version": "1.0.0",
+  "description": "PRO DIGITALIX — Analytics SaaS pour vendeurs Chariow",
+  "author": "ANABOK GROUP <anabokgroup@gmail.com>",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "electron/dist/main.js",
+  "homepage": "https://prodigitalix.com",
+  "scripts": {
+    "electron:dev": "cross-env NODE_ENV=development ELECTRON_URL=http://localhost:3000 electron electron/dist/main.js",
+    "electron:build": "tsc -p electron/tsconfig.json && electron-builder --win --x64 --config electron/electron-builder.yml",
+    "electron:build:all": "tsc -p electron/tsconfig.json && electron-builder --win --ia32 --x64 --config electron/electron-builder.yml"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3",
+    "typescript": "^5.5.4",
+    "@types/node": "^20.14.0",
+    "cross-env": "^7.0.3"
+  }
+}

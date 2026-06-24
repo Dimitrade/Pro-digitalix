@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="pd" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#00C8FF"/>
+      <stop offset="40%"  stop-color="#1A6EFF"/>
+      <stop offset="100%" stop-color="#0A1A6E"/>
+    </linearGradient>
+    <radialGradient id="bg" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#0F1E3C"/>
+      <stop offset="100%" stop-color="#070D1A"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <!-- P stem -->
+  <rect x="70" y="70" width="58" height="372" rx="22" fill="url(#pd)"/>
+  <!-- P bowl -->
+  <path d="M128 70 Q264 70 264 176 Q264 282 128 282 Z" fill="url(#pd)"/>
+  <!-- P inner cutout -->
+  <path d="M152 116 Q220 116 220 176 Q220 236 152 236 Z" fill="url(#bg)"/>
+  <!-- D stem -->
+  <rect x="298" y="70" width="58" height="372" rx="22" fill="url(#pd)"/>
+  <!-- D arc outer -->
+  <path d="M356 70 C434 70 460 128 460 256 C460 384 434 442 356 442 L356 398 C406 398 410 352 410 256 C410 160 406 114 356 114 Z" fill="url(#pd)"/>
+</svg>

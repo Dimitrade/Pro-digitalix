@@ -1,0 +1,51 @@
+appId: com.anabokgroup.prodigitalix
+productName: PRO DIGITALIX
+copyright: Copyright © 2024 ANABOK GROUP
+
+directories:
+  output: dist-electron
+  buildResources: electron/assets
+
+files:
+  - electron/dist/**/*
+  - package.json
+
+win:
+  target:
+    - target: nsis
+      arch: [x64, ia32]
+    - target: portable
+      arch: [x64]
+  icon: electron/assets/icon.ico
+  publisherName: ANABOK GROUP
+  verifyUpdateCodeSignature: false
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  installerIcon: electron/assets/icon.ico
+  uninstallerIcon: electron/assets/icon.ico
+  installerHeaderIcon: electron/assets/icon.ico
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: PRO DIGITALIX
+  license: LICENSE
+  deleteAppDataOnUninstall: false
+
+mac:
+  icon: electron/assets/icon.icns
+  category: public.app-category.business
+  hardenedRuntime: true
+  entitlements: electron/entitlements.mac.plist
+  entitlementsInherit: electron/entitlements.mac.plist
+
+linux:
+  target: AppImage
+  icon: electron/assets/icon.png
+  category: Office
+
+publish:
+  provider: github
+  owner: anabokgroup
+  repo: prodigitalix-releases
