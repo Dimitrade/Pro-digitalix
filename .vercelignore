@@ -1,0 +1,18 @@
+# Exclure tout sauf le frontend
+RELEASE-FINAL/
+RELEASE/
+dist-electron/
+backend/
+electron/
+database/
+nginx/
+scripts/
+docker-compose.prod.yml
+node_modules/
+frontend/node_modules/
+frontend/.next/
+**/*.exe
+**/*.apk
+**/*.aab
+**/*.ipa
+**/*.jks
