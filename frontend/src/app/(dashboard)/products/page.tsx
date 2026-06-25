@@ -258,6 +258,7 @@ export default function ProductsPage() {
 
       {/* Drawer produit */}
       {selected && <ProductDrawer product={selected} currency={currency} onClose={() => setSelected(null)} />}
+      </>}
     </div>
   )
 }
@@ -303,7 +304,6 @@ function ProductDrawer({ product: p, currency, onClose }: { product: any; curren
         )}
       </div>
     </div>
-      </>}
   )
 }
 

@@ -402,6 +402,7 @@ export default function CustomersPage() {
           onClose={() => setSelectedCustomer(null)}
         />
       )}
+      </>}
     </div>
   )
 }
@@ -494,7 +495,6 @@ function CustomerDrawer({ customer: c, currency, onClose }: { customer: any; cur
         </div>
       </div>
     </div>
-      </>}
   )
 }
 

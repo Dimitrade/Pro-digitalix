@@ -24,7 +24,7 @@ export default function SplashPage() {
 
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center bg-background gap-6">
-      <div className="animate-bounce-slow">
+      <div className="animate-pulse-slow">
         <LogoIcon size={96} />
       </div>
       <div className="text-center">
