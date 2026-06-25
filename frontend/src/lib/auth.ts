@@ -87,6 +87,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
+        token.full_name = user.full_name ?? user.name
         token.role = user.role
         token.plan = user.plan
         token.is_verified = user.is_verified
@@ -97,6 +98,7 @@ export const authOptions: NextAuthOptions = {
 
     async session({ session, token }) {
       session.user.id = token.id
+      session.user.full_name = token.full_name as string
       session.user.role = token.role
       session.user.plan = token.plan
       session.user.is_verified = token.is_verified

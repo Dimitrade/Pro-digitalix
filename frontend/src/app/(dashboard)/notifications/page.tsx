@@ -5,23 +5,14 @@ import {
   Bell, Search, Filter, Settings, CheckCheck,
   ShoppingCart, TrendingUp, AlertTriangle, FileText,
   Users, MoreHorizontal, Mail, MessageCircle, Smartphone,
-  Star, Archive, X, ChevronRight, Clock
+  Star, Archive, X, ChevronRight, Clock, Zap
 } from 'lucide-react'
-import { cn, formatNumber } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { useNotifications } from '@/hooks/useNotifications'
+import { useChariowAccounts } from '@/hooks/useChariowAccount'
 
-type NotifTab = 'all' | 'unread' | 'important' | 'archived'
-
-interface Notification {
-  id: string
-  title: string
-  body: string
-  type: 'order' | 'performance' | 'stock' | 'report' | 'visitor' | 'abandon'
-  read: boolean
-  important: boolean
-  time: string
-  group: 'today' | 'yesterday' | 'earlier'
-}
+type NotifTab = 'all' | 'unread' | 'archived'
 
 const TYPE_CONFIG: Record<string, { color: string; icon: React.ElementType; badge: string; badgeColor: string }> = {
   order:       { color: 'bg-blue-400/10 text-blue-400',    icon: ShoppingCart,  badge: 'Commande',    badgeColor: 'bg-blue-400/10 text-blue-400' },
@@ -32,15 +23,6 @@ const TYPE_CONFIG: Record<string, { color: string; icon: React.ElementType; badg
   abandon:     { color: 'bg-orange-400/10 text-orange-400',icon: ShoppingCart,  badge: 'Abandons',    badgeColor: 'bg-orange-400/10 text-orange-400' },
 }
 
-const DEMO_NOTIFS: Notification[] = [
-  { id: '1', title: 'Nouvelle commande #1258', body: 'Une nouvelle commande de 245 000 FCFA a été passée par Marie K.', type: 'order', read: false, important: true, time: 'Il y a 5 minutes', group: 'today' },
-  { id: '2', title: 'Objectif de ventes atteint !', body: 'Félicitations ! Vous avez atteint 100% de votre objectif de ventes quotidien.', type: 'performance', read: false, important: true, time: 'Il y a 1 heure', group: 'today' },
-  { id: '3', title: 'Stock faible : 3 produits', body: 'Certains produits ont un stock faible. Vérifiez maintenant.', type: 'stock', read: false, important: false, time: 'Il y a 2 heures', group: 'today' },
-  { id: '4', title: 'Rapport hebdomadaire disponible', body: 'Votre rapport de performance hebdomadaire est prêt.', type: 'report', read: true, important: false, time: 'Hier à 09:00', group: 'yesterday' },
-  { id: '5', title: 'Visites en hausse', body: 'Vos visites ont augmenté de 25% par rapport à hier.', type: 'visitor', read: true, important: false, time: 'Hier à 08:30', group: 'yesterday' },
-  { id: '6', title: 'Abandon de panier détecté', body: '18 paniers ont été abandonnés dans les dernières 24h.', type: 'abandon', read: true, important: false, time: 'Il y a 3 jours', group: 'earlier' },
-]
-
 const CHANNEL_CONFIG = [
   { key: 'in_app', label: 'Notifications in-app', icon: Bell, enabled: true },
   { key: 'email', label: 'Email', icon: Mail, enabled: true },
@@ -49,39 +31,39 @@ const CHANNEL_CONFIG = [
   { key: 'push', label: 'Push mobile', icon: Smartphone, enabled: true },
 ]
 
+function formatRelativeTime(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return "À l'instant"
+  if (mins < 60) return `Il y a ${mins} minute${mins > 1 ? 's' : ''}`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `Il y a ${hours} heure${hours > 1 ? 's' : ''}`
+  const days = Math.floor(hours / 24)
+  if (days === 1) return 'Hier'
+  return `Il y a ${days} jours`
+}
+
 export default function NotificationsPage() {
   const [tab, setTab] = useState<NotifTab>('all')
   const [search, setSearch] = useState('')
   const [channels, setChannels] = useState<Record<string, boolean>>(
     Object.fromEntries(CHANNEL_CONFIG.map(c => [c.key, c.enabled]))
   )
-  const [notifications, setNotifications] = useState(DEMO_NOTIFS)
 
-  const unreadCount = notifications.filter(n => !n.read).length
-  const importantCount = notifications.filter(n => n.important).length
+  const { data: accounts } = useChariowAccounts()
+  const hasAccount = !!accounts?.[0]
+  const { notifications: rawNotifs, unreadCount, isLoading, markRead, markAllRead } = useNotifications()
 
-  const filtered = notifications.filter(n => {
-    if (tab === 'unread') return !n.read
-    if (tab === 'important') return n.important
-    if (tab === 'archived') return false
-    return true
+  const filtered = rawNotifs.filter(n => {
+    if (tab === 'unread') return !n.read_at
+    if (tab === 'archived') return !!n.archived_at
+    return !n.archived_at
   }).filter(n => !search || n.title.toLowerCase().includes(search.toLowerCase()) || n.body.toLowerCase().includes(search.toLowerCase()))
 
-  function markAllRead() {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })))
-  }
-
-  const groups: { key: 'today' | 'yesterday' | 'earlier'; label: string }[] = [
-    { key: 'today', label: "Aujourd'hui" },
-    { key: 'yesterday', label: 'Hier' },
-    { key: 'earlier', label: 'Plus tôt' },
-  ]
-
   const tabs = [
-    { key: 'all' as NotifTab, label: 'Toutes', count: notifications.length },
+    { key: 'all' as NotifTab, label: 'Toutes', count: rawNotifs.filter(n => !n.archived_at).length },
     { key: 'unread' as NotifTab, label: 'Non lues', count: unreadCount },
-    { key: 'important' as NotifTab, label: 'Importantes', count: importantCount },
-    { key: 'archived' as NotifTab, label: 'Archives', count: 0 },
+    { key: 'archived' as NotifTab, label: 'Archives', count: rawNotifs.filter(n => !!n.archived_at).length },
   ]
 
   return (
@@ -107,7 +89,7 @@ export default function NotificationsPage() {
               placeholder="Rechercher…"
               className="h-9 w-48 bg-secondary border border-border rounded-lg pl-9 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground" />
           </div>
-          <Button variant="outline" size="sm" onClick={markAllRead}>
+          <Button variant="outline" size="sm" onClick={markAllRead} disabled={!hasAccount || unreadCount === 0}>
             <CheckCheck className="w-4 h-4" />
             Marquer tout comme lu
           </Button>
@@ -144,66 +126,65 @@ export default function NotificationsPage() {
             </Button>
           </div>
 
-          {/* Notifications groupées */}
+          {/* Notifications */}
           <div className="divide-y divide-border">
-            {groups.map(group => {
-              const groupNotifs = filtered.filter(n => n.group === group.key)
-              if (groupNotifs.length === 0) return null
+            {!hasAccount && (
+              <div className="py-16 text-center px-6">
+                <div className="w-14 h-14 rounded-2xl gradient-brand flex items-center justify-center mx-auto mb-4">
+                  <Zap className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="font-semibold text-foreground mb-1">Bienvenue sur PRO DIGITALIX !</h3>
+                <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+                  Connectez votre boutique Chariow pour recevoir vos notifications de ventes, stocks et performances en temps réel.
+                </p>
+              </div>
+            )}
+            {hasAccount && isLoading && (
+              <div className="py-12 text-center">
+                <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+              </div>
+            )}
+            {hasAccount && !isLoading && filtered.map(n => {
+              const cfg = TYPE_CONFIG[n.type] ?? TYPE_CONFIG['order']
+              const Icon = cfg.icon
+              const isUnread = !n.read_at
               return (
-                <div key={group.key}>
-                  <p className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-secondary/30">
-                    {group.label}
-                  </p>
-                  {groupNotifs.map(n => {
-                    const cfg = TYPE_CONFIG[n.type]
-                    const Icon = cfg.icon
-                    return (
-                      <div
-                        key={n.id}
-                        className={cn(
-                          'flex items-start gap-4 px-4 py-4 hover:bg-secondary/30 transition-colors cursor-pointer border-b border-border/50',
-                          !n.read && 'bg-primary/3'
-                        )}
-                      >
-                        {/* Dot non lu */}
-                        <div className="flex-shrink-0 mt-1">
-                          <div className={cn('w-2 h-2 rounded-full', !n.read ? 'bg-primary' : 'bg-transparent')} />
-                        </div>
-
-                        {/* Icône */}
-                        <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0', cfg.color)}>
-                          <Icon className="w-5 h-5" />
-                        </div>
-
-                        {/* Contenu */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2">
-                            <p className={cn('text-sm', !n.read ? 'font-semibold text-foreground' : 'font-medium text-foreground/80')}>
-                              {n.title}
-                            </p>
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                              <span className={cn('text-xs px-2 py-0.5 rounded-full font-medium', cfg.badgeColor)}>
-                                {cfg.badge}
-                              </span>
-                              {!n.read && <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />}
-                              <button className="text-muted-foreground hover:text-foreground">
-                                <MoreHorizontal className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-0.5">{n.body}</p>
-                          <p className="text-[10px] text-muted-foreground mt-1.5 flex items-center gap-1">
-                            <Clock className="w-3 h-3" />{n.time}
-                          </p>
-                        </div>
+                <div
+                  key={n.id}
+                  onClick={() => isUnread && markRead(n.id)}
+                  className={cn(
+                    'flex items-start gap-4 px-4 py-4 hover:bg-secondary/30 transition-colors cursor-pointer border-b border-border/50',
+                    isUnread && 'bg-primary/3'
+                  )}
+                >
+                  <div className="flex-shrink-0 mt-1">
+                    <div className={cn('w-2 h-2 rounded-full', isUnread ? 'bg-primary' : 'bg-transparent')} />
+                  </div>
+                  <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0', cfg.color)}>
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className={cn('text-sm', isUnread ? 'font-semibold text-foreground' : 'font-medium text-foreground/80')}>
+                        {n.title}
+                      </p>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span className={cn('text-xs px-2 py-0.5 rounded-full font-medium', cfg.badgeColor)}>
+                          {cfg.badge}
+                        </span>
+                        {isUnread && <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />}
                       </div>
-                    )
-                  })}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">{n.body}</p>
+                    <p className="text-[10px] text-muted-foreground mt-1.5 flex items-center gap-1">
+                      <Clock className="w-3 h-3" />{formatRelativeTime(n.created_at)}
+                    </p>
+                  </div>
                 </div>
               )
             })}
 
-            {filtered.length === 0 && (
+            {hasAccount && !isLoading && filtered.length === 0 && (
               <div className="py-12 text-center">
                 <Bell className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
                 <p className="text-muted-foreground text-sm">Aucune notification.</p>
@@ -279,10 +260,8 @@ export default function NotificationsPage() {
             <p className="text-xs text-muted-foreground mb-4">Sur les 7 derniers jours</p>
             <div className="grid grid-cols-2 gap-3">
               {[
-                { icon: Bell, label: 'Total reçues', value: 48, color: 'text-primary' },
-                { icon: Mail, label: 'Par email', value: 32, color: 'text-green-400' },
-                { icon: Smartphone, label: 'Par SMS', value: 12, color: 'text-orange-400' },
-                { icon: MessageCircle, label: 'Par WhatsApp', value: 4, color: 'text-green-400' },
+                { icon: Bell, label: 'Total reçues', value: rawNotifs.length, color: 'text-primary' },
+                { icon: Bell, label: 'Non lues', value: unreadCount, color: 'text-green-400' },
               ].map(s => (
                 <div key={s.label} className="glass rounded-lg p-3 text-center">
                   <s.icon className={cn('w-4 h-4 mx-auto mb-1', s.color)} />

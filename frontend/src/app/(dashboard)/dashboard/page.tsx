@@ -67,7 +67,7 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground">
-            Bonjour, {session?.user?.full_name?.split(' ')[0] || 'Vendeur'} 👋
+            Bonjour, {session?.user?.full_name?.split(' ')[0] || session?.user?.name?.split(' ')[0] || session?.user?.email?.split('@')[0] || 'Bienvenue'} 👋
           </h1>
           <p className="text-muted-foreground text-sm mt-0.5">
             {activeAccount
