@@ -33,3 +33,5 @@ Thumbs.db
 # Keystore Android (SÉCURITÉ)
 *.jks
 *.keystore
+
+.vercel
