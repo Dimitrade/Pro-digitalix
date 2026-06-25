@@ -1,11 +1,5 @@
 'use client'
 
-/**
- * Logo officiel PRO DIGITALIX — ANABOK GROUP
- * Source unique : modifier ici met à jour toute l'application.
- * Pour utiliser le PNG officiel : déposer logo-official.png dans /public/
- * et décommenter la section "Version image officielle" ci-dessous.
- */
 import { cn } from '@/lib/utils'
 
 interface LogoProps {
@@ -22,30 +16,51 @@ const SIZES = {
   xl: { icon: 80, text: 'text-3xl', gap: 'gap-4' },
 }
 
-/** Monogramme PD — fidèle au logo officiel : dégradé cyan→bleu→marine */
+/** Icône PD — fidèle au logo officiel PRO DIGITALIX */
 export function LogoIcon({ size = 36, className }: { size?: number; className?: string }) {
-  const id = `pd-${Math.random().toString(36).slice(2,6)}`
+  const uid = `pd-${Math.random().toString(36).slice(2, 7)}`
+  const gMain = `${uid}-main`
+  const gCyan = `${uid}-cyan`
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100" fill="none"
-      className={className} xmlns="http://www.w3.org/2000/svg">
+    <svg width={size} height={size} viewBox="0 0 120 130" fill="none"
+      xmlns="http://www.w3.org/2000/svg" className={className}>
       <defs>
-        <linearGradient id={id} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%"   stopColor="#00C8FF"/>
-          <stop offset="40%"  stopColor="#1A6EFF"/>
-          <stop offset="100%" stopColor="#0A1A6E"/>
+        {/* Dégradé principal : marine → bleu → cyan (haut-gauche → bas-droite) */}
+        <linearGradient id={gMain} x1="0" y1="0" x2="120" y2="130" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stopColor="#0D1B4B"/>
+          <stop offset="50%"  stopColor="#1655C0"/>
+          <stop offset="100%" stopColor="#00C8FF"/>
+        </linearGradient>
+        {/* Dégradé accent cyan pour le trait de séparation */}
+        <linearGradient id={gCyan} x1="0" y1="0" x2="120" y2="130" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stopColor="#1A6EFF"/>
+          <stop offset="100%" stopColor="#00DFFF"/>
         </linearGradient>
       </defs>
-      {/* P — tige verticale */}
-      <rect x="8" y="8" width="12" height="84" rx="5" fill={`url(#${id})`}/>
-      {/* P — bol (arc extérieur) */}
-      <path d="M20 8 Q58 8 58 32 Q58 56 20 56 Z" fill={`url(#${id})`}/>
-      {/* P — découpe intérieure */}
-      <path d="M24 18 Q48 18 48 32 Q48 46 24 46 Z" fill="#0B1426"/>
-      {/* D — tige verticale */}
-      <rect x="64" y="8" width="12" height="84" rx="5" fill={`url(#${id})`}/>
-      {/* D — arc extérieur */}
-      <path d="M76 8 C94 8 100 22 100 50 C100 78 94 92 76 92 L76 80 C88 80 88 66 88 50 C88 34 88 20 76 20 Z"
-            fill={`url(#${id})`}/>
+
+      {/* ── Lettre P (gauche) ── */}
+      {/* Tige verticale P */}
+      <rect x="4" y="4" width="18" height="122" rx="6" fill={`url(#${gMain})`}/>
+      {/* Arc extérieur du P */}
+      <path
+        d="M22 4 C70 4 80 18 80 42 C80 66 70 80 22 80 L22 62 C58 62 62 54 62 42 C62 30 58 22 22 22 Z"
+        fill={`url(#${gMain})`}
+      />
+
+      {/* ── Lettre D (droite, légèrement décalée / superposée) ── */}
+      {/* Tige verticale D */}
+      <rect x="60" y="30" width="16" height="96" rx="6" fill={`url(#${gCyan})`}/>
+      {/* Arc extérieur du D */}
+      <path
+        d="M76 30 C110 30 120 52 120 78 C120 104 110 126 76 126 L76 110 C100 110 104 96 104 78 C104 60 100 46 76 46 Z"
+        fill={`url(#${gCyan})`}
+      />
+
+      {/* Trait de lumière diagonal — effet 3D/biseau */}
+      <path
+        d="M22 62 L62 42 L62 22 L22 22 Z"
+        fill="rgba(0,200,255,0.18)"
+      />
     </svg>
   )
 }
@@ -58,8 +73,10 @@ export function Logo({ size = 'sm', variant = 'full', className }: LogoProps) {
 
   if (variant === 'text') return (
     <span className={cn('font-black tracking-tight leading-none', s.text, className)}>
-      <span style={{ color: '#0F172A' }}>PRO </span>
-      <span style={{ background: 'linear-gradient(90deg,#1A6EFF,#00C8FF)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>DIGITALIX</span>
+      <span style={{ color: '#0D1B4B' }}>PRO </span>
+      <span style={{ background: 'linear-gradient(90deg,#1655C0,#00C8FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+        DIGITALIX
+      </span>
     </span>
   )
 
@@ -67,12 +84,14 @@ export function Logo({ size = 'sm', variant = 'full', className }: LogoProps) {
     <div className={cn('flex items-center', s.gap, className)}>
       <LogoIcon size={s.icon} />
       <div>
-        <p className={cn('font-black leading-tight', s.text)}>
-          <span className="text-foreground">PRO </span>
-          <span className="gradient-text">DIGITALIX</span>
+        <p className={cn('font-black leading-tight tracking-tight', s.text)}>
+          <span style={{ color: 'var(--foreground)' }}>PRO </span>
+          <span style={{ background: 'linear-gradient(90deg,#1655C0,#00C8FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            DIGITALIX
+          </span>
         </p>
         {(size === 'lg' || size === 'xl') && (
-          <p className="text-[11px] text-muted-foreground mt-0.5">
+          <p className="text-[11px] text-muted-foreground mt-0.5 tracking-wide">
             Analysez • Optimisez • Développez
           </p>
         )}
@@ -80,17 +99,3 @@ export function Logo({ size = 'sm', variant = 'full', className }: LogoProps) {
     </div>
   )
 }
-
-/**
- * VERSION IMAGE OFFICIELLE — activer quand logo-official.png est dans /public/
- *
- * import Image from 'next/image'
- * export function Logo({ size = 'sm', className }: LogoProps) {
- *   const s = SIZES[size]
- *   return (
- *     <Image src="/logo-official.png" alt="PRO DIGITALIX"
- *       width={s.icon * 5} height={s.icon}
- *       className={cn('object-contain', className)} priority />
- *   )
- * }
- */
