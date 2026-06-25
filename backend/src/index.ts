@@ -50,9 +50,24 @@ const authLimiter = rateLimit({
 })
 app.use(globalLimiter)
 
+// ── Trust proxy (Render, Vercel) ──
+app.set('trust proxy', 1)
+
 // ── CORS ──
+const allowedOrigins = [
+  process.env.FRONTEND_URL || 'http://localhost:3000',
+  'https://prodigitalix.online',
+  'https://www.prodigitalix.online',
+  'https://frontend-three-lovat-44.vercel.app',
+]
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      callback(null, true)
+    } else {
+      callback(new Error('CORS non autorisé'))
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-chariow-signature'],
