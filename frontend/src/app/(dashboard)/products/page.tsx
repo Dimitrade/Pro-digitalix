@@ -41,7 +41,7 @@ export default function ProductsPage() {
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<any>(null)
 
-  const { data: accounts } = useChariowAccounts()
+  const { data: accounts, isLoading: accountsLoading } = useChariowAccounts()
   const accountId = accounts?.[0]?.id || null
   const currency = accounts?.[0]?.currency || 'XOF'
 
@@ -51,8 +51,8 @@ export default function ProductsPage() {
     enabled: !!accountId,
   })
 
-  const products = data?.products || DEMO_PRODUCTS
-  const metrics = data?.metrics || DEMO_PRODUCT_METRICS
+  const products = data?.products || []
+  const metrics = data?.metrics || { total_active: 0, total_revenue: 0, sales_this_month: 0, avg_ai_score: 0, top_product_name: '' }
 
   const filtered = products.filter((p: any) => {
     if (tab === 'top') return (p.ai_score || 0) >= 70
@@ -81,6 +81,22 @@ export default function ProductsPage() {
         </div>
       </div>
 
+      {!accountId && !accountsLoading && (
+        <div className="glass rounded-xl p-10 text-center border border-primary/20">
+          <div className="w-14 h-14 rounded-2xl gradient-brand flex items-center justify-center mx-auto mb-4">
+            <Package className="w-7 h-7 text-white" />
+          </div>
+          <h3 className="font-semibold text-foreground mb-2">Aucune boutique connectée</h3>
+          <p className="text-sm text-muted-foreground max-w-xs mx-auto mb-4">
+            Connectez votre boutique Chariow pour analyser vos produits et obtenir des recommandations IA.
+          </p>
+          <a href="/integrations" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl gradient-brand text-white text-sm font-medium">
+            Connecter Chariow
+          </a>
+        </div>
+      )}
+
+      {(accountId || accountsLoading) && <>
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard title="Produits actifs" value={formatNumber(metrics.total_active)} icon={Package} iconColor="text-blue-400" loading={isLoading && !!accountId} />
@@ -287,6 +303,7 @@ function ProductDrawer({ product: p, currency, onClose }: { product: any; curren
         )}
       </div>
     </div>
+      </>}
   )
 }
 
@@ -296,15 +313,3 @@ const AI_INSIGHTS = [
   { type: 'info', title: 'Opportunité de bundle', body: 'Combiner vos 3 premières formations pourrait augmenter le panier moyen de +40%.' },
 ]
 
-const DEMO_PRODUCT_METRICS = {
-  total_active: 8, total_revenue: 183850, sales_this_month: 41,
-  avg_ai_score: 72, top_product_name: 'FORMATION VENTE DIGITALE'
-}
-
-const DEMO_PRODUCTS = [
-  { id: '1', name: 'FORMATION VENTE DES PRODUITS DIGITAUX', category: 'Formation', type: 'Vidéo', price: 5000, total_sales: 31, total_revenue: 155000, growth_pct: 23, ai_score: 95, ai_recommendation: 'Ce produit est votre best-seller. Lancez une version avancée à prix premium pour doubler le CA.' },
-  { id: '2', name: 'Formation achat CHINE-AFRIQUE', category: 'Formation', type: 'Vidéo', price: 4500, total_sales: 4, total_revenue: 17500, growth_pct: -15, ai_score: 58, ai_recommendation: 'Les ventes ont baissé. Testez une offre promotionnelle à -30% pour relancer la demande.' },
-  { id: '3', name: 'FORMATION VIDEO IA GEMINI', category: 'Formation', type: 'Vidéo', price: 2000, total_sales: 4, total_revenue: 7500, growth_pct: 8, ai_score: 65, ai_recommendation: 'Potentiel élevé sur TikTok. Créez 3 vidéos courtes montrant les résultats concrets.' },
-  { id: '4', name: 'Pack Marketing Digital Afrique', category: 'Pack', type: 'Bundle', price: 7500, total_sales: 2, total_revenue: 15000, growth_pct: 0, ai_score: 48, ai_recommendation: 'Prix trop élevé pour votre audience actuelle. Essayez 5000 FCFA avec paiement en 2x.' },
-  { id: '5', name: 'Guide Copywriting Conversion', category: 'Ebook', type: 'PDF', price: 1500, total_sales: 1, total_revenue: 1500, growth_pct: -5, ai_score: 38, ai_recommendation: 'Visibilité insuffisante. Offrez-le gratuitement en échange d\'un email pour développer votre liste.' },
-]

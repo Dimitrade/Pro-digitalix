@@ -2,13 +2,14 @@
 
 import { useState } from 'react'
 import {
-  TrendingUp, ShoppingCart, Users, Eye,
+  TrendingUp, ShoppingCart, Users,
   RefreshCw, Plus, Zap, ArrowUpRight,
-  DollarSign, Target, Clock, BarChart2
+  DollarSign, Target, Clock, BarChart2, Link2
 } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
+import Link from 'next/link'
 
 import { MetricCard } from '@/components/dashboard/metric-card'
 import { RevenueChart } from '@/components/dashboard/revenue-chart'
@@ -18,21 +19,6 @@ import { useChariowAccounts } from '@/hooks/useChariowAccount'
 import { useDashboard, useRevenueTrend } from '@/hooks/useDashboard'
 import { formatCurrency, formatNumber, formatPercent } from '@/lib/utils'
 import { chariowApi } from '@/lib/api'
-
-// Données de démo pour quand il n'y a pas encore de compte connecté
-const DEMO_TREND = [
-  { date: '2026-06-01', revenue: 10000, orders: 3 },
-  { date: '2026-06-02', revenue: 25000, orders: 6 },
-  { date: '2026-06-03', revenue: 10000, orders: 2 },
-  { date: '2026-06-04', revenue: 15000, orders: 3 },
-  { date: '2026-06-05', revenue: 5000, orders: 1 },
-  { date: '2026-06-07', revenue: 10000, orders: 3 },
-  { date: '2026-06-08', revenue: 15000, orders: 3 },
-  { date: '2026-06-10', revenue: 15000, orders: 3 },
-  { date: '2026-06-14', revenue: 10000, orders: 2 },
-  { date: '2026-06-20', revenue: 25000, orders: 5 },
-  { date: '2026-06-23', revenue: 15000, orders: 3 },
-]
 
 export default function DashboardPage() {
   const { data: session } = useSession()
@@ -57,8 +43,8 @@ export default function DashboardPage() {
     onError: () => toast.error('Erreur de synchronisation.'),
   })
 
-  const currency = activeAccount?.currency || metrics?.revenue?.currency || 'XOF'
-  const trend = trendData?.daily_trend || DEMO_TREND
+  const currency = activeAccount?.currency || 'XOF'
+  const trend = trendData?.daily_trend || []
   const isDemo = !activeAccount
 
   return (
@@ -94,16 +80,21 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Banner demo */}
-      {isDemo && (
-        <div className="glass rounded-xl p-4 border-l-4 border-primary flex items-center gap-3">
-          <Zap className="w-5 h-5 text-primary flex-shrink-0" />
-          <div>
-            <p className="text-sm font-medium text-foreground">Mode démonstration</p>
-            <p className="text-xs text-muted-foreground">Connectez votre boutique Chariow pour afficher vos données réelles.</p>
+      {/* Banner — aucun compte connecté */}
+      {isDemo && !accountsLoading && (
+        <div className="glass rounded-xl p-6 border border-primary/30 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+          <div className="w-12 h-12 rounded-2xl gradient-brand flex items-center justify-center flex-shrink-0">
+            <Link2 className="w-6 h-6 text-white" />
           </div>
-          <Button variant="gradient" size="sm" className="ml-auto" onClick={() => setShowConnect(true)}>
-            Connecter
+          <div className="flex-1">
+            <p className="font-semibold text-foreground">Connectez votre boutique Chariow</p>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Vos ventes, clients, produits et statistiques apparaîtront ici dès la connexion.
+            </p>
+          </div>
+          <Button variant="gradient" size="sm" className="flex-shrink-0" onClick={() => setShowConnect(true)}>
+            <Zap className="w-4 h-4" />
+            Connecter maintenant
           </Button>
         </div>
       )}
@@ -119,29 +110,28 @@ export default function DashboardPage() {
             value={formatCurrency(metrics?.revenue?.today ?? 0, currency)}
             icon={DollarSign}
             iconColor="text-green-400"
-            loading={metricsLoading}
+            loading={metricsLoading && !!activeAccount}
           />
           <MetricCard
             title="CA Cette semaine"
             value={formatCurrency(metrics?.revenue?.week ?? 0, currency)}
             icon={TrendingUp}
             iconColor="text-primary"
-            loading={metricsLoading}
+            loading={metricsLoading && !!activeAccount}
           />
           <MetricCard
             title="CA Ce mois"
-            value={formatCurrency(metrics?.revenue?.month ?? 183850, currency)}
-            sub="Juin 2026"
+            value={formatCurrency(metrics?.revenue?.month ?? 0, currency)}
             icon={BarChart2}
             iconColor="text-electric-400"
-            loading={metricsLoading}
+            loading={metricsLoading && !!activeAccount}
           />
           <MetricCard
             title="CA Total"
-            value={formatCurrency(metrics?.revenue?.total ?? 183850, currency)}
+            value={formatCurrency(metrics?.revenue?.total ?? 0, currency)}
             icon={Target}
             iconColor="text-purple-400"
-            loading={metricsLoading}
+            loading={metricsLoading && !!activeAccount}
           />
         </div>
       </div>
@@ -154,33 +144,33 @@ export default function DashboardPage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <MetricCard
             title="Commandes (mois)"
-            value={formatNumber(metrics?.orders?.month ?? 41)}
+            value={formatNumber(metrics?.orders?.month ?? 0)}
             sub={`${formatNumber(metrics?.orders?.today ?? 0)} aujourd'hui`}
             icon={ShoppingCart}
             iconColor="text-orange-400"
-            loading={metricsLoading}
+            loading={metricsLoading && !!activeAccount}
           />
           <MetricCard
             title="Clients total"
-            value={formatNumber(metrics?.customers?.total ?? 1017)}
-            sub={`${metrics?.customers?.new_this_month ?? 36} nouveaux ce mois`}
+            value={formatNumber(metrics?.customers?.total ?? 0)}
+            sub={`${metrics?.customers?.new_this_month ?? 0} nouveaux ce mois`}
             icon={Users}
             iconColor="text-blue-400"
-            loading={metricsLoading}
+            loading={metricsLoading && !!activeAccount}
           />
           <MetricCard
             title="Panier moyen"
-            value={formatCurrency(metrics?.average_order_value ?? 4484, currency)}
+            value={formatCurrency(metrics?.average_order_value ?? 0, currency)}
             icon={Clock}
             iconColor="text-yellow-400"
-            loading={metricsLoading}
+            loading={metricsLoading && !!activeAccount}
           />
           <MetricCard
             title="Taux conversion"
-            value={formatPercent(metrics?.conversion_rate ?? 3.89)}
+            value={formatPercent(metrics?.conversion_rate ?? 0)}
             icon={ArrowUpRight}
             iconColor="text-green-400"
-            loading={metricsLoading}
+            loading={metricsLoading && !!activeAccount}
           />
         </div>
       </div>
@@ -197,61 +187,63 @@ export default function DashboardPage() {
         {/* Top Produits */}
         <div className="glass rounded-xl p-5">
           <h3 className="font-semibold text-foreground mb-4">Top Produits</h3>
-          <div className="space-y-3">
-            {(metrics?.top_products?.length
-              ? metrics.top_products
-              : [
-                { name: 'FORMATION VENTE DES PRODUITS DIGITAUX', total_sales: 31, total_revenue: 155000, thumbnail_url: null },
-                { name: 'Formation achat CHINE-AFRIQUE', total_sales: 4, total_revenue: 17500, thumbnail_url: null },
-                { name: 'FORMATION VIDEO IA GEMINI', total_sales: 4, total_revenue: 7500, thumbnail_url: null },
-              ]
-            ).slice(0, 5).map((p, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <span className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary flex-shrink-0">
-                  {i + 1}
-                </span>
-                {p.thumbnail_url ? (
-                  <img src={p.thumbnail_url} alt="" className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />
-                ) : (
-                  <div className="w-8 h-8 rounded-lg bg-secondary flex-shrink-0" />
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{p.name}</p>
-                  <p className="text-xs text-muted-foreground">{p.total_sales} ventes</p>
+          {metrics?.top_products?.length ? (
+            <div className="space-y-3">
+              {metrics.top_products.slice(0, 5).map((p: any, i: number) => (
+                <div key={i} className="flex items-center gap-3">
+                  <span className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary flex-shrink-0">
+                    {i + 1}
+                  </span>
+                  {p.thumbnail_url ? (
+                    <img src={p.thumbnail_url} alt="" className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-lg bg-secondary flex-shrink-0" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{p.name}</p>
+                    <p className="text-xs text-muted-foreground">{p.total_sales} ventes</p>
+                  </div>
+                  <p className="text-sm font-bold text-primary flex-shrink-0">
+                    {formatCurrency(p.total_revenue, currency)}
+                  </p>
                 </div>
-                <p className="text-sm font-bold text-primary flex-shrink-0">
-                  {formatCurrency(p.total_revenue, currency)}
-                </p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-8 text-center text-muted-foreground text-sm">
+              {isDemo ? (
+                <><p>Connectez Chariow pour voir vos produits.</p>
+                <Button variant="outline" size="sm" className="mt-3" onClick={() => setShowConnect(true)}>Connecter</Button></>
+              ) : <p>Aucun produit synchronisé.</p>}
+            </div>
+          )}
         </div>
 
         {/* Répartition pays */}
         <div className="glass rounded-xl p-5">
           <h3 className="font-semibold text-foreground mb-4">Ventes par pays</h3>
-          <div className="space-y-3">
-            {[
-              { country: '🇧🇯 Bénin', orders: 10, pct: 24 },
-              { country: '🇹🇬 Togo', orders: 7, pct: 17 },
-              { country: '🇨🇮 Côte d\'Ivoire', orders: 6, pct: 15 },
-              { country: '🇫🇷 France', orders: 3, pct: 7 },
-              { country: '🇬🇳 Guinée', orders: 2, pct: 5 },
-            ].map((c) => (
-              <div key={c.country} className="space-y-1">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-foreground font-medium">{c.country}</span>
-                  <span className="text-muted-foreground">{c.orders} cmd · {c.pct}%</span>
+          {metrics?.sales_by_country?.length ? (
+            <div className="space-y-3">
+              {metrics.sales_by_country.slice(0, 5).map((c: any) => (
+                <div key={c.country} className="space-y-1">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-foreground font-medium">{c.country}</span>
+                    <span className="text-muted-foreground">{c.orders} cmd · {c.pct}%</span>
+                  </div>
+                  <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+                    <div
+                      className="h-full gradient-brand rounded-full transition-all duration-500"
+                      style={{ width: `${c.pct}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
-                  <div
-                    className="h-full gradient-brand rounded-full transition-all duration-500"
-                    style={{ width: `${c.pct}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-8 text-center text-muted-foreground text-sm">
+              {isDemo ? 'Connectez Chariow pour voir la répartition géographique.' : 'Aucune donnée disponible.'}
+            </div>
+          )}
         </div>
       </div>
 

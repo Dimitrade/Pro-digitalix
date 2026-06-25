@@ -53,7 +53,7 @@ export default function CustomersPage() {
   const [page, setPage] = useState(1)
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null)
 
-  const { data: accounts } = useChariowAccounts()
+  const { data: accounts, isLoading: accountsLoading } = useChariowAccounts()
   const accountId = accounts?.[0]?.id || null
   const currency = accounts?.[0]?.currency || 'XOF'
 
@@ -63,11 +63,11 @@ export default function CustomersPage() {
     enabled: !!accountId,
   })
 
-  const customers = data?.customers || DEMO_CUSTOMERS
-  const total = data?.total || DEMO_CUSTOMERS.length
-  const totalPages = Math.ceil(total / 10)
+  const customers = data?.customers || []
+  const total = data?.total || 0
+  const totalPages = Math.ceil(total / 10) || 1
 
-  const metrics = data?.metrics || DEMO_METRICS
+  const metrics = data?.metrics || { total: 0, new_this_month: 0, active: 0, avg_ltv: 0, growth_pct: 0 }
 
   const tabs: { key: Tab; label: string }[] = [
     { key: 'all', label: 'Tous les clients' },
@@ -99,6 +99,22 @@ export default function CustomersPage() {
         </div>
       </div>
 
+      {!accountId && !accountsLoading && (
+        <div className="glass rounded-xl p-10 text-center border border-primary/20">
+          <div className="w-14 h-14 rounded-2xl gradient-brand flex items-center justify-center mx-auto mb-4">
+            <Users className="w-7 h-7 text-white" />
+          </div>
+          <h3 className="font-semibold text-foreground mb-2">Aucune boutique connectée</h3>
+          <p className="text-sm text-muted-foreground max-w-xs mx-auto mb-4">
+            Connectez votre boutique Chariow pour voir vos clients et leur historique d&apos;achats.
+          </p>
+          <a href="/integrations" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl gradient-brand text-white text-sm font-medium">
+            Connecter Chariow
+          </a>
+        </div>
+      )}
+
+      {(accountId || accountsLoading) && <>
       {/* Métriques */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
@@ -460,7 +476,7 @@ function CustomerDrawer({ customer: c, currency, onClose }: { customer: any; cur
             Historique des achats
           </h3>
           <div className="space-y-2">
-            {(c.orders || DEMO_ORDERS).map((o: any, i: number) => (
+            {(c.orders || []).map((o: any, i: number) => (
               <div key={i} className="glass rounded-lg p-3 flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg gradient-brand flex items-center justify-center flex-shrink-0">
                   <ShoppingBag className="w-4 h-4 text-white" />
@@ -478,22 +494,7 @@ function CustomerDrawer({ customer: c, currency, onClose }: { customer: any; cur
         </div>
       </div>
     </div>
+      </>}
   )
 }
 
-// Données de démo
-const DEMO_METRICS = { total: 1017, new_this_month: 36, active: 687, avg_ltv: 4484, growth_pct: 12.5 }
-const DEMO_ORDERS = [
-  { name: 'FORMATION VENTE DIGITALE', created_at: '2026-06-20', amount: 5000 },
-  { name: 'Formation achat CHINE', created_at: '2026-05-10', amount: 4500 },
-]
-const DEMO_CUSTOMERS = [
-  { id: '1', full_name: 'Koffi Amani', email: 'koffi.amani@email.com', phone: '+22890112233', total_spent: 245000, total_orders: 8, segment: 'vip', last_order_at: '2026-06-22', country: 'Togo', created_at: '2025-01-15' },
-  { id: '2', full_name: 'Marie Bertin', email: 'marie.bertin@email.com', phone: '+22996112233', total_spent: 185000, total_orders: 6, segment: 'active', last_order_at: '2026-06-21', country: 'Bénin', created_at: '2025-03-10' },
-  { id: '3', full_name: 'Yao Ahoussou', email: 'yao.ahoussou@email.com', phone: '+22507112233', total_spent: 320000, total_orders: 11, segment: 'vip', last_order_at: '2026-06-20', country: 'Côte d\'Ivoire', created_at: '2024-11-05' },
-  { id: '4', full_name: 'Serge Bamba', email: 'serge.bamba@email.com', phone: '+22507445566', total_spent: 75000, total_orders: 2, segment: 'inactive', last_order_at: '2026-05-08', country: 'Côte d\'Ivoire', created_at: '2025-05-20' },
-  { id: '5', full_name: 'Nadia Aka', email: 'nadia.aka@email.com', phone: '+22507778899', total_spent: 130000, total_orders: 4, segment: 'active', last_order_at: '2026-06-22', country: 'Côte d\'Ivoire', created_at: '2025-04-12' },
-  { id: '6', full_name: 'Fabrice Ouattara', email: 'fabrice.ouattara@email.com', total_spent: 45000, total_orders: 1, segment: 'inactive', last_order_at: '2026-04-15', country: 'Côte d\'Ivoire', created_at: '2026-03-01' },
-  { id: '7', full_name: 'Estelle Dago', email: 'estelle.dago@email.com', phone: '+22507334455', total_spent: 210000, total_orders: 7, segment: 'active', last_order_at: '2026-06-23', country: 'Côte d\'Ivoire', created_at: '2024-09-18' },
-  { id: '8', full_name: 'Thomas Kouassi', email: 'thomas.kouassi@email.com', phone: '+22507556677', total_spent: 165000, total_orders: 5, segment: 'active', last_order_at: '2026-06-19', country: 'Côte d\'Ivoire', created_at: '2025-02-14' },
-]

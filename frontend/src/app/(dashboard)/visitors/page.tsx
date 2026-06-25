@@ -20,7 +20,7 @@ type Period = '7d' | '30d' | '90d'
 export default function VisitorsPage() {
   const [period, setPeriod] = useState<Period>('30d')
 
-  const { data: accounts } = useChariowAccounts()
+  const { data: accounts, isLoading: accountsLoading } = useChariowAccounts()
   const accountId = accounts?.[0]?.id || null
 
   const { data, isLoading } = useQuery({
@@ -29,11 +29,11 @@ export default function VisitorsPage() {
     enabled: !!accountId,
   })
 
-  const metrics = data?.metrics || DEMO_METRICS
-  const trend = data?.trend || DEMO_TREND
-  const sources = data?.sources || DEMO_SOURCES
-  const countries = data?.countries || DEMO_COUNTRIES
-  const devices = data?.devices || DEMO_DEVICES
+  const metrics = data?.metrics || { unique_visitors: 0, page_views: 0, avg_duration: 0, bounce_rate: 0, pages_per_visit: 0 }
+  const trend = data?.trend || []
+  const sources = data?.sources || []
+  const countries = data?.countries || []
+  const devices = data?.devices || []
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -57,6 +57,22 @@ export default function VisitorsPage() {
         </div>
       </div>
 
+      {!accountId && !accountsLoading && (
+        <div className="glass rounded-xl p-10 text-center border border-primary/20">
+          <div className="w-14 h-14 rounded-2xl gradient-brand flex items-center justify-center mx-auto mb-4">
+            <Eye className="w-7 h-7 text-white" />
+          </div>
+          <h3 className="font-semibold text-foreground mb-2">Aucune boutique connectée</h3>
+          <p className="text-sm text-muted-foreground max-w-xs mx-auto mb-4">
+            Connectez votre boutique Chariow pour suivre le trafic, les sources et les comportements de vos visiteurs.
+          </p>
+          <a href="/integrations" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl gradient-brand text-white text-sm font-medium">
+            Connecter Chariow
+          </a>
+        </div>
+      )}
+
+      {(accountId || accountsLoading) && <>
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard title="Visiteurs uniques" value={formatNumber(metrics.unique_visitors)} sub="+12% vs période préc." icon={Users} iconColor="text-blue-400" loading={isLoading && !!accountId} />
@@ -178,65 +194,13 @@ export default function VisitorsPage() {
             <BarChart2 className="w-4 h-4 text-primary" />
             Pages les plus visitées
           </h3>
-          <div className="space-y-3">
-            {TOP_PAGES.map((page, i) => (
-              <div key={i} className="flex items-start gap-3">
-                <span className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary flex-shrink-0 mt-0.5">
-                  {i + 1}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{page.name}</p>
-                  <p className="text-xs text-muted-foreground">{page.url}</p>
-                </div>
-                <div className="text-right flex-shrink-0">
-                  <p className="text-sm font-bold text-foreground">{formatNumber(page.views)}</p>
-                  <p className="text-xs text-muted-foreground">vues</p>
-                </div>
-              </div>
-            ))}
+          <div className="py-6 text-center text-sm text-muted-foreground">
+            Synchronisez pour voir les pages les plus visitées.
           </div>
         </div>
       </div>
+      </>}
     </div>
   )
 }
 
-// Données démo
-const DEMO_METRICS = { unique_visitors: 1284, page_views: 4218, avg_duration: 187, bounce_rate: 52.3, pages_per_visit: 3.3 }
-
-const DEMO_TREND = Array.from({ length: 30 }, (_, i) => ({
-  date: new Date(Date.now() - (29 - i) * 864e5).toISOString().split('T')[0],
-  visitors: Math.floor(20 + Math.random() * 80),
-}))
-
-const DEMO_SOURCES = [
-  { source: 'Facebook', pct: 42 },
-  { source: 'TikTok', pct: 21 },
-  { source: 'WhatsApp', pct: 15 },
-  { source: 'Instagram', pct: 10 },
-  { source: 'Google', pct: 7 },
-  { source: 'Autres', pct: 5 },
-]
-
-const DEMO_COUNTRIES = [
-  { flag: '🇧🇯', country: 'Bénin', visitors: 412, pct: 32 },
-  { flag: '🇹🇬', country: 'Togo', visitors: 284, pct: 22 },
-  { flag: '🇨🇮', country: "Côte d'Ivoire", visitors: 218, pct: 17 },
-  { flag: '🇫🇷', country: 'France', visitors: 142, pct: 11 },
-  { flag: '🇬🇳', country: 'Guinée', visitors: 98, pct: 8 },
-  { flag: '🌍', country: 'Autres', visitors: 130, pct: 10 },
-]
-
-const DEMO_DEVICES = [
-  { device: 'Mobile', visitors: 874, pct: 68 },
-  { device: 'Desktop', visitors: 308, pct: 24 },
-  { device: 'Tablette', visitors: 102, pct: 8 },
-]
-
-const TOP_PAGES = [
-  { name: 'Formation Vente Digitale', url: '/produits/formation-vente', views: 892 },
-  { name: 'Accueil boutique', url: '/', views: 754 },
-  { name: 'Formation CHINE-AFRIQUE', url: '/produits/formation-chine', views: 423 },
-  { name: 'Formation IA Gemini', url: '/produits/formation-ia', views: 318 },
-  { name: 'Panier / Checkout', url: '/checkout', views: 241 },
-]

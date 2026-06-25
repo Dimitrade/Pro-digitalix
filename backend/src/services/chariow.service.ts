@@ -4,7 +4,7 @@ import { queryOne, query } from '../utils/db'
 import { logger } from '../utils/logger'
 import { AppError } from '../middleware/error.middleware'
 
-const CHARIOW_BASE = 'https://mcp.chariow.com/public'
+const CHARIOW_BASE = 'https://api.chariow.com/v1'
 
 // ── Client Chariow authentifié par API key ───────────────────
 
@@ -39,15 +39,16 @@ export async function connectChariowAccount(userId: string, apiKey: string) {
   let storeData: any
   try {
     const { data } = await client.get('/store')
-    storeData = data
+    storeData = data.data ?? data
   } catch {
     throw new AppError('Clé API Chariow invalide. Vérifiez votre clé.', 400, 'INVALID_API_KEY')
   }
 
   // Vérifier que ce compte n'est pas déjà connecté
+  const storeSlug = storeData.custom_slug || storeData.id
   const existing = await queryOne<{ id: string }>(
     'SELECT id FROM chariow_accounts WHERE store_slug = $1 AND user_id = $2',
-    [storeData.custom_slug || storeData.id, userId]
+    [storeSlug, userId]
   )
   if (existing) throw new AppError('Cette boutique est déjà connectée.', 409, 'ALREADY_CONNECTED')
 
@@ -61,7 +62,7 @@ export async function connectChariowAccount(userId: string, apiKey: string) {
     [
       userId,
       storeData.name,
-      storeData.custom_slug || storeData.id,
+      storeSlug,
       encrypt(apiKey),
       storeData.url,
       storeData.currency?.code || 'XOF',
@@ -77,7 +78,7 @@ export async function getStoreInfo(accountId: string, userId: string) {
   const apiKey = await getDecryptedApiKey(accountId, userId)
   const client = createChariowClient(apiKey)
   const { data } = await client.get('/store')
-  return data
+  return data.data ?? data
 }
 
 // ── Synchronisation complète ────────────────────────────────
